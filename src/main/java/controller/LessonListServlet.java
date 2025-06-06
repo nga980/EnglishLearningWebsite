@@ -10,14 +10,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "LessonListServlet", urlPatterns = {"/lessons"}) // Ánh xạ servlet tới URL /lessons
+@WebServlet(name = "LessonListServlet", urlPatterns = {"/lessons"})
 public class LessonListServlet extends HttpServlet {
 
     private LessonDAO lessonDAO;
+    private static final int PAGE_SIZE = 6; // Hiển thị 6 bài học trên mỗi trang
 
     @Override
-    public void init() throws ServletException {
-        super.init();
+    public void init() {
         lessonDAO = new LessonDAO();
     }
 
@@ -27,19 +27,32 @@ public class LessonListServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        try {
-            List<Lesson> lessonList = lessonDAO.getAllLessons();
-            request.setAttribute("lessonList", lessonList);
-            request.getRequestDispatcher("lessons.jsp").forward(request, response);
-        } catch (Exception e) {
-            request.setAttribute("error", "Không thể tải danh sách bài học: " + e.getMessage());
+        String pageStr = request.getParameter("page");
+        int currentPage = 1;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageStr);
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
         }
-    }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Tạm thời xử lý POST như GET. Có thể thay đổi để hỗ trợ tìm kiếm bài học, lọc, v.v.
-        doGet(request, response);
+        int totalLessons = lessonDAO.countTotalLessons();
+        int totalPages = (int) Math.ceil((double) totalLessons / PAGE_SIZE);
+
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+
+        List<Lesson> lessonList = lessonDAO.getLessonsByPage(currentPage, PAGE_SIZE);
+
+        request.setAttribute("lessonList", lessonList);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
+
+        request.getRequestDispatcher("lessons.jsp").forward(request, response);
     }
 }

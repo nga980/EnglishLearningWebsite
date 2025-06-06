@@ -143,4 +143,84 @@ public class GrammarTopicDAO {
         }
         return false;
     }
+    /**
+     * Tìm kiếm chủ đề ngữ pháp theo tiêu đề.
+     * @param keyword Từ khóa tìm kiếm.
+     * @return Danh sách các chủ đề ngữ pháp khớp.
+     */
+    public List<GrammarTopic> searchGrammarTopics(String keyword) {
+        List<GrammarTopic> topics = new ArrayList<>();
+        String query = "SELECT * FROM grammar_topics WHERE title LIKE ? ORDER BY title ASC";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, "%" + keyword + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    // ... (code tạo đối tượng GrammarTopic giống như trong getAllGrammarTopics) ...
+                    GrammarTopic topic = new GrammarTopic();
+                    topic.setTopicId(rs.getInt("topic_id"));
+                    topic.setTitle(rs.getString("title"));
+                    topic.setContent(rs.getString("content"));
+                    topic.setExampleSentences(rs.getString("example_sentences"));
+                    topic.setDifficultyLevel(rs.getString("difficulty_level"));
+                    topic.setCreatedAt(rs.getTimestamp("created_at"));
+                    topics.add(topic);
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi tìm kiếm ngữ pháp với từ khóa: " + keyword, e);
+        }
+        return topics;
+    }
+    /**
+     * Đếm tổng số chủ đề ngữ pháp.
+     * @return Tổng số chủ đề.
+     */
+    public int countTotalGrammarTopics() {
+        String query = "SELECT COUNT(*) FROM grammar_topics";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi đếm tổng số chủ đề ngữ pháp", e);
+        }
+        return 0;
+    }
+
+    /**
+     * Lấy danh sách chủ đề ngữ pháp cho một trang cụ thể.
+     * @param pageNumber Số trang hiện tại (bắt đầu từ 1).
+     * @param pageSize Số lượng mục trên mỗi trang.
+     * @return Danh sách các chủ đề ngữ pháp.
+     */
+    public List<GrammarTopic> getGrammarTopicsByPage(int pageNumber, int pageSize) {
+        List<GrammarTopic> topics = new ArrayList<>();
+        String query = "SELECT * FROM grammar_topics ORDER BY title ASC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            int offset = (pageNumber - 1) * pageSize;
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    GrammarTopic topic = new GrammarTopic();
+                    topic.setTopicId(rs.getInt("topic_id"));
+                    topic.setTitle(rs.getString("title"));
+                    topic.setDifficultyLevel(rs.getString("difficulty_level"));
+                    topic.setCreatedAt(rs.getTimestamp("created_at"));
+                    topics.add(topic);
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách chủ đề ngữ pháp theo trang", e);
+        }
+        return topics;
+    }
 }

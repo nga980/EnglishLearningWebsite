@@ -114,6 +114,30 @@
                         </tbody>
                     </table>
                 </div>
+                    <%-- THÊM KHỐI PHÂN TRANG VÀO ĐÂY --%>
+                <c:if test="${totalPages > 1}">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            <%-- Nút Previous --%>
+                            <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin/manage-lessons?page=${currentPage - 1}">Trước</a>
+                            </li>
+
+                            <%-- Các nút số trang --%>
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                    <a class="page-link" href="${pageContext.request.contextPath}/admin/manage-lessons?page=${i}">${i}</a>
+                                </li>
+                            </c:forEach>
+
+                            <%-- Nút Next --%>
+                            <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                                <a class="page-link" href="${pageContext.request.contextPath}/admin/manage-lessons?page=${currentPage + 1}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </c:if>
+
             </main>
         </div>
     </div>

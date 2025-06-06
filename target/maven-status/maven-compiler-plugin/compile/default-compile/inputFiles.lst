@@ -5,6 +5,7 @@ D:\Learn\EnglishLearningWebsite\src\main\java\controller\AddLessonServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\AddQuizQuestionServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\AddVocabularyServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\AdminDashboardServlet.java
+D:\Learn\EnglishLearningWebsite\src\main\java\controller\ChangePasswordServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\DeleteGrammarServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\DeleteLessonServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\DeleteQuizQuestionServlet.java
@@ -12,6 +13,7 @@ D:\Learn\EnglishLearningWebsite\src\main\java\controller\DeleteUserServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\DeleteVocabularyServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\EditGrammarFormServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\EditLessonFormServlet.java
+D:\Learn\EnglishLearningWebsite\src\main\java\controller\EditQuizQuestionFormServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\EditVocabularyFormServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\GrammarDetailServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\GrammarListServlet.java
@@ -24,11 +26,14 @@ D:\Learn\EnglishLearningWebsite\src\main\java\controller\ManageLessonsServlet.ja
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\ManageQuizServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\ManageUsersServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\ManageVocabularyServlet.java
+D:\Learn\EnglishLearningWebsite\src\main\java\controller\ProfileServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\RegisterServlet.java
+D:\Learn\EnglishLearningWebsite\src\main\java\controller\SearchServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\SubmitQuizServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\TakeQuizServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\UpdateGrammarServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\UpdateLessonServlet.java
+D:\Learn\EnglishLearningWebsite\src\main\java\controller\UpdateQuizQuestionServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\UpdateUserRoleServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\UpdateVocabularyServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\VocabularyListServlet.java

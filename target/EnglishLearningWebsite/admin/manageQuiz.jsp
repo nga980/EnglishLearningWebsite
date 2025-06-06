@@ -48,16 +48,21 @@
                 <c:when test="${not empty questionList}">
                         <c:forEach var="question" items="${questionList}" varStatus="loop">
                             <div class="card mb-3">
-                                <div class="card-header d-flex justify-content-between">
+                                <div class="card-header d-flex justify-content-between align-items-center">
                                     <strong>Câu ${loop.count}: <c:out value="${question.questionText}"/></strong>
-                                    <a href="${pageContext.request.contextPath}/admin/delete-quiz-question?questionId=${question.questionId}&lessonId=${lesson.lessonId}" 
-                                       class="btn btn-sm btn-outline-danger" 
-                                       onclick="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này không?');">
-                                        <span data-feather="trash-2"></span> Xóa
-                                    </a>
-                                </div>
+                                    <div class="btn-group">
+                                        <a href="${pageContext.request.contextPath}/admin/edit-quiz-question-form?questionId=${question.questionId}" 
+                                           class="btn btn-sm btn-info">
+                                            <i data-feather="edit-3"></i> Sửa
+                                        </a>
+                                        <a href="${pageContext.request.contextPath}/admin/delete-quiz-question?questionId=${question.questionId}&lessonId=${lesson.lessonId}" 
+                                           class="btn btn-sm btn-outline-danger" 
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này không?');">
+                                            <i data-feather="trash-2"></i> Xóa
+                                        </a>
+                                    </div>
+                                </div>                      
                                 <ul class="list-group list-group-flush">
-                                    <%-- SỬA LỖI Ở ĐÂY --%>
                                     <c:forEach var="option" items="${question.options}">
                                         <li class="list-group-item ${option.isCorrect ? 'correct-answer' : ''}">
                                             <c:out value="${option.optionText}"/>

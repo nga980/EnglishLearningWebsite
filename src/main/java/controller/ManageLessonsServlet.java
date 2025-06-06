@@ -1,7 +1,7 @@
-package controller; // Hoặc package controller của bạn
+package controller;
 
-import dao.LessonDAO; // Hoặc package dao của bạn
-import model.Lesson;  // Hoặc package model của bạn
+import dao.LessonDAO;
+import model.Lesson;
 import java.io.IOException;
 import java.util.List;
 import jakarta.servlet.ServletException;
@@ -10,19 +10,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Servlet này xử lý việc hiển thị trang quản lý bài học cho Admin.
- * Nó lấy danh sách bài học và chuyển đến manageLessons.jsp.
- * Được bảo vệ bởi AdminAuthFilter.
- */
 @WebServlet(name = "ManageLessonsServlet", urlPatterns = {"/admin/manage-lessons"})
 public class ManageLessonsServlet extends HttpServlet {
 
     private LessonDAO lessonDAO;
+    private static final int PAGE_SIZE = 5; // Số lượng bài học trên mỗi trang
 
     @Override
     public void init() {
-        lessonDAO = new LessonDAO(); // Khởi tạo DAO
+        lessonDAO = new LessonDAO();
     }
 
     @Override
@@ -31,22 +27,37 @@ public class ManageLessonsServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        List<Lesson> lessonList = lessonDAO.getAllLessons();
+        // Lấy số trang hiện tại từ request parameter. Mặc định là trang 1.
+        String pageStr = request.getParameter("page");
+        int currentPage = 1;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageStr);
+            } catch (NumberFormatException e) {
+                currentPage = 1; // Nếu param không hợp lệ, quay về trang 1
+            }
+        }
+
+        // Lấy tổng số bài học để tính tổng số trang
+        int totalLessons = lessonDAO.countTotalLessons();
+        int totalPages = (int) Math.ceil((double) totalLessons / PAGE_SIZE);
+
+        // Đảm bảo currentPage không vượt quá tổng số trang
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        
+        // Lấy danh sách bài học cho trang hiện tại
+        List<Lesson> lessonList = lessonDAO.getLessonsByPage(currentPage, PAGE_SIZE);
+
+        // Đặt các thuộc tính vào request để JSP có thể sử dụng
         request.setAttribute("lessonList", lessonList);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
 
-        // Chuyển tiếp đến trang JSP trong thư mục admin
         request.getRequestDispatcher("/admin/manageLessons.jsp").forward(request, response);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Có thể dùng cho các action như xóa nhiều bài, tìm kiếm (nếu cần)
-        doGet(request, response); // Hiện tại, POST sẽ làm giống GET
-    }
-
-    @Override
-    public String getServletInfo() {
-        return "Servlet for managing lessons (listing lessons for admin)";
     }
 }

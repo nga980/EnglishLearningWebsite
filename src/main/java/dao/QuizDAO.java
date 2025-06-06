@@ -147,4 +147,106 @@ public class QuizDAO {
         }
         return false;
     }
+    /**
+     * Lấy một câu hỏi cụ thể và các lựa chọn của nó bằng ID câu hỏi.
+     * @param questionId ID của câu hỏi.
+     * @return Đối tượng QuizQuestion hoặc null nếu không tìm thấy.
+     */
+    public QuizQuestion getQuestionById(int questionId) {
+        QuizQuestion question = null;
+        String questionQuery = "SELECT question_id, lesson_id, question_text FROM quiz_questions WHERE question_id = ?";
+        String optionQuery = "SELECT option_id, option_text, is_correct FROM quiz_options WHERE question_id = ?";
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement psQuestion = conn.prepareStatement(questionQuery)) {
+
+            psQuestion.setInt(1, questionId);
+            try (ResultSet rsQuestion = psQuestion.executeQuery()) {
+                if (rsQuestion.next()) {
+                    question = new QuizQuestion();
+                    question.setQuestionId(rsQuestion.getInt("question_id"));
+                    question.setLessonId(rsQuestion.getInt("lesson_id"));
+                    question.setQuestionText(rsQuestion.getString("question_text"));
+
+                    // Lấy các lựa chọn cho câu hỏi này
+                    try (PreparedStatement psOptions = conn.prepareStatement(optionQuery)) {
+                        psOptions.setInt(1, questionId);
+                        try (ResultSet rsOptions = psOptions.executeQuery()) {
+                            while (rsOptions.next()) {
+                                QuizOption option = new QuizOption();
+                                option.setOptionId(rsOptions.getInt("option_id"));
+                                option.setQuestionId(questionId);
+                                option.setOptionText(rsOptions.getString("option_text"));
+                                option.setIsCorrect(rsOptions.getBoolean("is_correct"));
+                                question.addOption(option);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy câu hỏi với ID: " + questionId, e);
+        }
+        return question;
+    }
+    /**
+     * Cập nhật một câu hỏi và các lựa chọn của nó.
+     * Sử dụng transaction để đảm bảo tất cả các cập nhật thành công hoặc không có gì thay đổi.
+     * @param question Đối tượng QuizQuestion chứa thông tin đã cập nhật.
+     * @return true nếu thành công, false nếu thất bại.
+     */
+    public boolean updateQuestionWithOptions(QuizQuestion question) {
+        String questionUpdateQuery = "UPDATE quiz_questions SET question_text = ? WHERE question_id = ?";
+        String optionUpdateQuery = "UPDATE quiz_options SET option_text = ?, is_correct = ? WHERE option_id = ?";
+        Connection conn = null;
+        boolean success = false;
+
+        try {
+            conn = DBContext.getConnection();
+            // Bắt đầu transaction
+            conn.setAutoCommit(false);
+
+            // 1. Cập nhật nội dung câu hỏi
+            try (PreparedStatement psQuestion = conn.prepareStatement(questionUpdateQuery)) {
+                psQuestion.setString(1, question.getQuestionText());
+                psQuestion.setInt(2, question.getQuestionId());
+                psQuestion.executeUpdate();
+            }
+
+            // 2. Cập nhật các lựa chọn
+            try (PreparedStatement psOption = conn.prepareStatement(optionUpdateQuery)) {
+                for (QuizOption option : question.getOptions()) {
+                    psOption.setString(1, option.getOptionText());
+                    psOption.setBoolean(2, option.isIsCorrect());
+                    psOption.setInt(3, option.getOptionId());
+                    psOption.addBatch(); // Thêm vào batch để thực thi cùng lúc
+                }
+                psOption.executeBatch(); // Thực thi batch
+            }
+            
+            conn.commit(); // Hoàn tất transaction nếu không có lỗi
+            success = true;
+            LOGGER.log(Level.INFO, "Cập nhật câu hỏi và các lựa chọn thành công cho question ID: {0}", question.getQuestionId());
+
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật câu hỏi và lựa chọn. Đang rollback transaction.", e);
+            if (conn != null) {
+                try {
+                    conn.rollback(); // Rollback nếu có lỗi
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Lỗi khi rollback transaction.", ex);
+                }
+            }
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true); // Trả lại trạng thái auto-commit mặc định
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Lỗi khi đóng kết nối.", ex);
+                }
+            }
+        }
+        return success;
+    }
 }

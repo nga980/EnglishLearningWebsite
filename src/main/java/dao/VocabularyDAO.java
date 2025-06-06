@@ -215,4 +215,79 @@ public class VocabularyDAO {
         }
         return 0;
     }
+    /**
+     * Tìm kiếm từ vựng theo từ hoặc nghĩa.
+     * @param keyword Từ khóa tìm kiếm.
+     * @return Danh sách các từ vựng khớp.
+     */
+    public List<Vocabulary> searchVocabulary(String keyword) {
+        List<Vocabulary> vocabList = new ArrayList<>();
+        String query = "SELECT * FROM vocabulary WHERE word LIKE ? OR meaning LIKE ? ORDER BY word ASC";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, "%" + keyword + "%");
+            ps.setString(2, "%" + keyword + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    // ... (code tạo đối tượng Vocabulary giống như trong getAllVocabulary) ...
+                    Vocabulary vocab = new Vocabulary();
+                    vocab.setVocabId(rs.getInt("vocab_id"));
+                    vocab.setWord(rs.getString("word"));
+                    vocab.setMeaning(rs.getString("meaning"));
+                    vocab.setExample(rs.getString("example"));
+                    int lessonId = rs.getInt("lesson_id");
+                    if (rs.wasNull()) {
+                        vocab.setLessonId(null);
+                    } else {
+                        vocab.setLessonId(lessonId);
+                    }
+                    vocab.setCreatedAt(rs.getTimestamp("created_at"));
+                    vocabList.add(vocab);
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi tìm kiếm từ vựng với từ khóa: " + keyword, e);
+        }
+        return vocabList;
+    }
+    /**
+     * Lấy danh sách từ vựng cho một trang cụ thể.
+     * @param pageNumber Số trang hiện tại (bắt đầu từ 1).
+     * @param pageSize Số lượng từ vựng trên mỗi trang.
+     * @return Danh sách các đối tượng Vocabulary cho trang đó.
+     */
+    public List<Vocabulary> getVocabularyByPage(int pageNumber, int pageSize) {
+        List<Vocabulary> vocabList = new ArrayList<>();
+        String query = "SELECT vocab_id, word, meaning, example, lesson_id, created_at FROM vocabulary ORDER BY word ASC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            int offset = (pageNumber - 1) * pageSize;
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Vocabulary vocab = new Vocabulary();
+                    vocab.setVocabId(rs.getInt("vocab_id"));
+                    vocab.setWord(rs.getString("word"));
+                    vocab.setMeaning(rs.getString("meaning"));
+                    vocab.setExample(rs.getString("example"));
+                    int lessonId = rs.getInt("lesson_id");
+                    if (rs.wasNull()) {
+                        vocab.setLessonId(null);
+                    } else {
+                        vocab.setLessonId(lessonId);
+                    }
+                    vocab.setCreatedAt(rs.getTimestamp("created_at"));
+                    vocabList.add(vocab);
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách từ vựng theo trang", e);
+        }
+        return vocabList;
+    }
 }

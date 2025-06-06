@@ -53,6 +53,29 @@
                 <p class="alert alert-info">Hiện chưa có bài học nào.</p>
             </c:otherwise>
         </c:choose>
+        <%--  KHỐI PHÂN TRANG --%>
+        <c:if test="${totalPages > 1}">
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <%-- Nút Previous --%>
+                    <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="${pageContext.request.contextPath}/lessons?page=${currentPage - 1}">Trước</a>
+                    </li>
+
+                    <%-- Các nút số trang --%>
+                    <c:forEach begin="1" end="${totalPages}" var="i">
+                        <li class="page-item ${currentPage == i ? 'active' : ''}">
+                            <a class="page-link" href="${pageContext.request.contextPath}/lessons?page=${i}">${i}</a>
+                        </li>
+                    </c:forEach>
+
+                    <%-- Nút Next --%>
+                    <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="${pageContext.request.contextPath}/lessons?page=${currentPage + 1}">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </c:if>        
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

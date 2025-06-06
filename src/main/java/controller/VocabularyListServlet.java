@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.VocabularyDAO;
@@ -14,47 +10,49 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "VocabularyListServlet", urlPatterns = {"/vocabulary"}) // Ánh xạ servlet tới URL /vocabulary
+@WebServlet(name = "VocabularyListServlet", urlPatterns = {"/vocabulary"})
 public class VocabularyListServlet extends HttpServlet {
 
     private VocabularyDAO vocabularyDAO;
+    private static final int PAGE_SIZE = 15; // Hiển thị 15 từ vựng trên mỗi trang
 
     @Override
     public void init() {
         vocabularyDAO = new VocabularyDAO();
     }
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        // Lấy tất cả từ vựng
-        // Tùy chọn: Nếu bạn muốn lọc từ vựng theo bài học, bạn có thể kiểm tra request parameter "lessonId" ở đây
-        // String lessonIdParam = request.getParameter("lessonId");
-        // List<Vocabulary> vocabularyList;
-        // if (lessonIdParam != null && !lessonIdParam.isEmpty()) {
-        // try {
-        // int lessonId = Integer.parseInt(lessonIdParam);
-        // vocabularyList = vocabularyDAO.getVocabularyByLessonId(lessonId);
-        // request.setAttribute("filterLessonId", lessonId); // Để JSP biết đang lọc theo bài nào
-        // } catch (NumberFormatException e) {
-        // vocabularyList = vocabularyDAO.getAllVocabulary(); // Nếu lessonId không hợp lệ, lấy tất cả
-        // }
-        // } else {
-        // vocabularyList = vocabularyDAO.getAllVocabulary();
-        // }
+        String pageStr = request.getParameter("page");
+        int currentPage = 1;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageStr);
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
 
-        List<Vocabulary> vocabularyList = vocabularyDAO.getAllVocabulary();
+        int totalVocabulary = vocabularyDAO.countTotalVocabulary();
+        int totalPages = (int) Math.ceil((double) totalVocabulary / PAGE_SIZE);
+        
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+
+        List<Vocabulary> vocabularyList = vocabularyDAO.getVocabularyByPage(currentPage, PAGE_SIZE);
+
         request.setAttribute("vocabularyList", vocabularyList);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("vocabulary.jsp").forward(request, response);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        // Có thể xử lý POST nếu cần, ví dụ: tìm kiếm từ vựng
-        doGet(request, response); // Hiện tại, xử lý POST giống như GET
     }
 }

@@ -194,4 +194,79 @@ public boolean addUser(User user) {
         }
         return false;
     }
+    /**
+     * Lấy mật khẩu đã được mã hóa của người dùng từ CSDL.
+     * @param userId ID của người dùng.
+     * @return Chuỗi mật khẩu đã mã hóa, hoặc null nếu không tìm thấy người dùng.
+     */
+    public String getHashedPasswordById(int userId) {
+        String query = "SELECT password FROM users WHERE user_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("password");
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy mật khẩu của người dùng ID: " + userId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Cập nhật mật khẩu mới cho người dùng.
+     * @param userId ID của người dùng.
+     * @param newHashedPassword Mật khẩu mới đã được mã hóa.
+     * @return true nếu cập nhật thành công, false nếu thất bại.
+     */
+    public boolean updatePassword(int userId, String newHashedPassword) {
+        String query = "UPDATE users SET password = ? WHERE user_id = ?";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setString(1, newHashedPassword);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi cập nhật mật khẩu cho người dùng ID: " + userId, e);
+        }
+        return false;
+    }
+    /**
+     * Lấy danh sách người dùng theo trang.
+     * @param pageNumber Số trang hiện tại.
+     * @param pageSize Số lượng người dùng trên trang.
+     * @return Danh sách người dùng.
+     */
+    public List<User> getUsersByPage(int pageNumber, int pageSize) {
+        List<User> userList = new ArrayList<>();
+        String query = "SELECT user_id, username, email, full_name, role, created_at FROM users ORDER BY user_id ASC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            int offset = (pageNumber - 1) * pageSize;
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    User user = new User();
+                    user.setUserId(rs.getInt("user_id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
+                    user.setFullName(rs.getString("full_name"));
+                    user.setRole(rs.getString("role"));
+                    user.setCreatedAt(rs.getTimestamp("created_at"));
+                    userList.add(user);
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách người dùng theo trang", e);
+        }
+        return userList;
+    }
 }

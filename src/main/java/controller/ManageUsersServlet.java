@@ -10,13 +10,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-/**
- * Servlet xử lý việc hiển thị trang quản lý người dùng cho Admin.
- */
 @WebServlet(name = "ManageUsersServlet", urlPatterns = {"/admin/manage-users"})
 public class ManageUsersServlet extends HttpServlet {
 
     private UserDAO userDAO;
+    private static final int PAGE_SIZE = 10;
 
     @Override
     public void init() {
@@ -29,8 +27,31 @@ public class ManageUsersServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         request.setCharacterEncoding("UTF-8");
 
-        List<User> userList = userDAO.getAllUsers();
+        String pageStr = request.getParameter("page");
+        int currentPage = 1;
+        if (pageStr != null && !pageStr.isEmpty()) {
+            try {
+                currentPage = Integer.parseInt(pageStr);
+            } catch (NumberFormatException e) {
+                currentPage = 1;
+            }
+        }
+
+        int totalUsers = userDAO.countTotalUsers(); // Phương thức này đã có
+        int totalPages = (int) Math.ceil((double) totalUsers / PAGE_SIZE);
+        
+        if (currentPage > totalPages && totalPages > 0) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+
+        List<User> userList = userDAO.getUsersByPage(currentPage, PAGE_SIZE);
+
         request.setAttribute("userList", userList);
+        request.setAttribute("currentPage", currentPage);
+        request.setAttribute("totalPages", totalPages);
 
         request.getRequestDispatcher("/admin/manageUsers.jsp").forward(request, response);
     }

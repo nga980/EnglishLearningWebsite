@@ -43,6 +43,23 @@
                 <p class="alert alert-info">Hiện chưa có chủ đề ngữ pháp nào.</p>
             </c:otherwise>
         </c:choose>
+        <c:if test="${totalPages > 1}">
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="${pageContext.request.contextPath}/grammar?page=${currentPage - 1}">Trước</a>
+                        </li>
+                        <c:forEach begin="1" end="${totalPages}" var="i">
+                            <li class="page-item ${currentPage == i ? 'active' : ''}">
+                                <a class="page-link" href="${pageContext.request.contextPath}/grammar?page=${i}">${i}</a>
+                            </li>
+                        </c:forEach>
+                        <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+                            <a class="page-link" href="${pageContext.request.contextPath}/grammar?page=${currentPage + 1}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </c:if>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

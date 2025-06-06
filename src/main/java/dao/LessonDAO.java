@@ -25,29 +25,41 @@ public class LessonDAO {
     private static final Logger LOGGER = Logger.getLogger(LessonDAO.class.getName());
 
     /**
-     * Lấy tất cả các bài học từ CSDL.
-     * @return Danh sách các đối tượng Lesson.
+     * Lấy danh sách các bài học cho một trang cụ thể.
+     * @param pageNumber Số trang hiện tại (bắt đầu từ 1).
+     * @param pageSize Số lượng bài học trên mỗi trang.
+     * @return Danh sách các đối tượng Lesson cho trang đó.
      */
-    public List<Lesson> getAllLessons() {
+    public List<Lesson> getLessonsByPage(int pageNumber, int pageSize) {
         List<Lesson> lessons = new ArrayList<>();
-        String query = "SELECT lesson_id, title, content, created_at FROM lessons ORDER BY created_at DESC";
+        // Sử dụng LIMIT và OFFSET để phân trang
+        // OFFSET là vị trí bắt đầu lấy, ví dụ: trang 1 -> offset 0, trang 2 -> offset 5 (nếu pageSize=5)
+        String query = "SELECT lesson_id, title, content, created_at FROM lessons ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        
         try (Connection conn = DBContext.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(query)) {
 
-            while (rs.next()) {
-                Lesson lesson = new Lesson();
-                lesson.setLessonId(rs.getInt("lesson_id"));
-                lesson.setTitle(rs.getString("title"));
-                lesson.setContent(rs.getString("content")); // Cân nhắc chỉ lấy content khi xem chi tiết nếu content quá dài
-                lesson.setCreatedAt(rs.getTimestamp("created_at"));
-                lessons.add(lesson);
+            int offset = (pageNumber - 1) * pageSize;
+            ps.setInt(1, pageSize);
+            ps.setInt(2, offset);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Lesson lesson = new Lesson();
+                    lesson.setLessonId(rs.getInt("lesson_id"));
+                    lesson.setTitle(rs.getString("title"));
+                    // Tạm thời không lấy content ở đây để trang danh sách tải nhanh hơn
+                    // lesson.setContent(rs.getString("content")); 
+                    lesson.setCreatedAt(rs.getTimestamp("created_at"));
+                    lessons.add(lesson);
+                }
             }
         } catch (SQLException | ClassNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách bài học", e);
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách bài học theo trang", e);
         }
         return lessons;
     }
+
 
     /**
      * Lấy một bài học cụ thể bằng ID.
@@ -147,6 +159,7 @@ public class LessonDAO {
     }
     /**
      * Đếm tổng số bài học trong CSDL.
+     * (Phương thức này bạn đã tạo ở bước làm dashboard, hãy đảm bảo nó vẫn tồn tại).
      * @return Tổng số bài học.
      */
     public int countTotalLessons() {
@@ -161,5 +174,32 @@ public class LessonDAO {
             LOGGER.log(Level.SEVERE, "Lỗi khi đếm tổng số bài học", e);
         }
         return 0;
+    }
+    /**
+     * Tìm kiếm bài học theo tiêu đề.
+     * @param keyword Từ khóa tìm kiếm.
+     * @return Danh sách các bài học khớp.
+     */
+    public List<Lesson> searchLessons(String keyword) {
+        List<Lesson> lessons = new ArrayList<>();
+        String query = "SELECT lesson_id, title, content, created_at FROM lessons WHERE title LIKE ? ORDER BY created_at DESC";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            
+            ps.setString(1, "%" + keyword + "%"); // Tìm kiếm các tiêu đề chứa từ khóa
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Lesson lesson = new Lesson();
+                    lesson.setLessonId(rs.getInt("lesson_id"));
+                    lesson.setTitle(rs.getString("title"));
+                    lesson.setContent(rs.getString("content"));
+                    lesson.setCreatedAt(rs.getTimestamp("created_at"));
+                    lessons.add(lesson);
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi tìm kiếm bài học với từ khóa: " + keyword, e);
+        }
+        return lessons;
     }
 }
