@@ -1,0 +1,55 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@page import="model.User" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa Chủ Đề Ngữ Pháp - Admin</title>
+    <%-- (Copy <head> content từ manageGrammar.jsp) --%>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/admin-style.css">
+</head>
+<body>
+    <jsp:include page="_adminLayout.jsp">
+        <jsp:param name="activePage" value="manage-grammar"/>
+    </jsp:include>
+    <main role="main" class="col-md-10 ml-sm-auto admin-main-content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Sửa Chủ Đề Ngữ Pháp</h1>
+        </div>
+        <c:if test="${not empty topicToEdit}">
+            <form method="POST" action="${pageContext.request.contextPath}/admin/update-grammar-action">
+                <input type="hidden" name="topicId" value="<c:out value='${topicToEdit.topicId}'/>">
+                <div class="form-group">
+                    <label for="title"><strong>Tiêu đề:</strong></label>
+                    <input type="text" class="form-control form-control-lg" id="title" name="title" required value="<c:out value='${topicToEdit.title}'/>">
+                </div>
+                <div class="form-group">
+                    <label for="content"><strong>Nội dung:</strong></label>
+                    <textarea class="form-control form-control-lg" id="content" name="content" rows="10" required><c:out value='${topicToEdit.content}'/></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="exampleSentences"><strong>Ví dụ:</strong></label>
+                    <textarea class="form-control form-control-lg" id="exampleSentences" name="exampleSentences" rows="5"><c:out value='${topicToEdit.exampleSentences}'/></textarea>
+                </div>
+                 <div class="form-group">
+                    <label for="difficultyLevel"><strong>Mức độ:</strong></label>
+                    <select class="form-control form-control-lg" id="difficultyLevel" name="difficultyLevel">
+                        <option value="Beginner" ${topicToEdit.difficultyLevel == 'Beginner' ? 'selected' : ''}>Beginner</option>
+                        <option value="Intermediate" ${topicToEdit.difficultyLevel == 'Intermediate' ? 'selected' : ''}>Intermediate</option>
+                        <option value="Advanced" ${topicToEdit.difficultyLevel == 'Advanced' ? 'selected' : ''}>Advanced</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg">Cập Nhật</button>
+                <a href="${pageContext.request.contextPath}/admin/manage-grammar" class="btn btn-secondary btn-lg">Hủy</a>
+            </form>
+        </c:if>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script>feather.replace();</script>
+</body>
+</html>
