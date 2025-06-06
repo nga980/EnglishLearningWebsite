@@ -3,10 +3,10 @@ package controller;
 import dao.QuizDAO;
 import model.QuizOption;
 import model.QuizQuestion;
-import model.QuizResultDetail; // Import lớp mới
 import model.User;
+import model.UserQuizAttempt; // THÊM IMPORT NÀY
 import java.io.IOException;
-import java.util.ArrayList; // Import ArrayList
+import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.QuizResultDetail;
 
 @WebServlet(name = "SubmitQuizServlet", urlPatterns = {"/submit-quiz"})
 public class SubmitQuizServlet extends HttpServlet {
@@ -49,23 +50,20 @@ public class SubmitQuizServlet extends HttpServlet {
 
             int score = 0;
             int totalQuestions = correctQuestions.size();
-
-            // Tạo danh sách để lưu kết quả chi tiết
             List<QuizResultDetail> detailedResults = new ArrayList<>();
 
             for (QuizQuestion question : correctQuestions) {
                 QuizResultDetail resultDetail = new QuizResultDetail();
-                resultDetail.setQuestion(question); // Gán câu hỏi gốc
+                resultDetail.setQuestion(question);
 
                 String selectedOptionIdStr = request.getParameter("question_" + question.getQuestionId());
-                int selectedOptionId = -1; // -1 nghĩa là không trả lời
+                boolean isAnswerCorrect = false;
+                int selectedOptionId = -1; // -1 nếu không trả lời
 
                 if (selectedOptionIdStr != null) {
                     selectedOptionId = Integer.parseInt(selectedOptionIdStr);
-                    resultDetail.setSelectedOptionId(selectedOptionId); // Ghi nhận lựa chọn của người dùng
-
-                    // Kiểm tra xem lựa chọn có đúng không
-                    boolean isAnswerCorrect = false;
+                    resultDetail.setSelectedOptionId(selectedOptionId);
+                    
                     for (QuizOption option : question.getOptions()) {
                         if (option.isIsCorrect() && option.getOptionId() == selectedOptionId) {
                             score++;
@@ -73,20 +71,31 @@ public class SubmitQuizServlet extends HttpServlet {
                             break;
                         }
                     }
-                    resultDetail.setWasCorrect(isAnswerCorrect); // Ghi nhận câu này đúng hay sai
+                    resultDetail.setWasCorrect(isAnswerCorrect);
                 } else {
-                    // Người dùng không trả lời câu này
                     resultDetail.setSelectedOptionId(-1);
                     resultDetail.setWasCorrect(false);
                 }
-
-                detailedResults.add(resultDetail); // Thêm kết quả chi tiết của câu hỏi vào danh sách
+                
+                // === PHẦN QUAN TRỌNG: LƯU LẠI KẾT QUẢ ===
+                if (selectedOptionId != -1) { // Chỉ lưu nếu người dùng có trả lời
+                    UserQuizAttempt attempt = new UserQuizAttempt(
+                        loggedInUser.getUserId(), 
+                        question.getQuestionId(), 
+                        selectedOptionId, 
+                        isAnswerCorrect
+                    );
+                    quizDAO.saveUserAttempt(attempt); // Gọi DAO để lưu
+                }
+                // ===========================================
+                
+                detailedResults.add(resultDetail);
             }
 
             request.setAttribute("score", score);
             request.setAttribute("totalQuestions", totalQuestions);
             request.setAttribute("lessonId", lessonId);
-            request.setAttribute("detailedResults", detailedResults); // Gửi danh sách kết quả chi tiết tới JSP
+            request.setAttribute("detailedResults", detailedResults);
 
             request.getRequestDispatcher("quizResult.jsp").forward(request, response);
 

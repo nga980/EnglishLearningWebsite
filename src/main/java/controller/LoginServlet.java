@@ -56,7 +56,7 @@ public class LoginServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/admin/dashboard");
             } else {
                 // Nếu là USER hoặc vai trò khác, chuyển hướng đến trang chủ
-                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                response.sendRedirect(request.getContextPath() + "/home");
             }
         } else {
             request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");

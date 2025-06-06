@@ -17,6 +17,7 @@ D:\Learn\EnglishLearningWebsite\src\main\java\controller\EditQuizQuestionFormSer
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\EditVocabularyFormServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\GrammarDetailServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\GrammarListServlet.java
+D:\Learn\EnglishLearningWebsite\src\main\java\controller\HomeServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\LessonDetailServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\LessonListServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\LoginServlet.java
@@ -27,6 +28,7 @@ D:\Learn\EnglishLearningWebsite\src\main\java\controller\ManageQuizServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\ManageUsersServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\ManageVocabularyServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\ProfileServlet.java
+D:\Learn\EnglishLearningWebsite\src\main\java\controller\QuizHistoryServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\RegisterServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\SearchServlet.java
 D:\Learn\EnglishLearningWebsite\src\main\java\controller\SubmitQuizServlet.java
@@ -46,9 +48,11 @@ D:\Learn\EnglishLearningWebsite\src\main\java\DBContext.java
 D:\Learn\EnglishLearningWebsite\src\main\java\filters\AdminAuthFilter.java
 D:\Learn\EnglishLearningWebsite\src\main\java\model\GrammarTopic.java
 D:\Learn\EnglishLearningWebsite\src\main\java\model\Lesson.java
+D:\Learn\EnglishLearningWebsite\src\main\java\model\QuizHistoryItem.java
 D:\Learn\EnglishLearningWebsite\src\main\java\model\QuizOption.java
 D:\Learn\EnglishLearningWebsite\src\main\java\model\QuizQuestion.java
 D:\Learn\EnglishLearningWebsite\src\main\java\model\QuizResultDetail.java
 D:\Learn\EnglishLearningWebsite\src\main\java\model\User.java
+D:\Learn\EnglishLearningWebsite\src\main\java\model\UserQuizAttempt.java
 D:\Learn\EnglishLearningWebsite\src\main\java\model\Vocabulary.java
 D:\Learn\EnglishLearningWebsite\src\main\java\utils\SecurityUtils.java

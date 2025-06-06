@@ -1,4 +1,5 @@
 controller\VocabularyListServlet.class
+controller\QuizHistoryServlet.class
 controller\ChangePasswordServlet.class
 dao\UserDAO.class
 model\User.class
@@ -16,6 +17,7 @@ controller\EditLessonFormServlet.class
 controller\AdminDashboardServlet.class
 controller\DeleteUserServlet.class
 controller\DeleteGrammarServlet.class
+model\QuizHistoryItem.class
 controller\DeleteLessonServlet.class
 controller\LessonDetailServlet.class
 controller\LogoutServlet.class
@@ -38,6 +40,7 @@ controller\GrammarDetailServlet.class
 controller\UpdateQuizQuestionServlet.class
 controller\DeleteVocabularyServlet.class
 controller\ProfileServlet.class
+model\UserQuizAttempt.class
 model\QuizResultDetail.class
 controller\DeleteQuizQuestionServlet.class
 controller\LoginServlet.class
@@ -51,4 +54,5 @@ controller\UpdateLessonServlet.class
 controller\ManageQuizServlet.class
 controller\AddVocabularyServlet.class
 controller\ManageVocabularyServlet.class
+controller\HomeServlet.class
 controller\UpdateGrammarServlet.class

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/admin-style.css"> <%-- Sử dụng lại CSS nếu có --%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/admin-style.css">
+    <script src="https://cdn.tiny.cloud/1/vn0hiraxxi1kjrfnyjmwv5qey0src7qravqh77cccznwy44x/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 <body>
     <jsp:include page="_adminLayout.jsp">
@@ -70,7 +71,7 @@
                     </div>
                     <div class="form-group">
                         <label for="lessonContent"><strong>Nội dung bài học:</strong></label>
-                        <textarea class="form-control form-control-lg" id="lessonContent" name="lessonContent" rows="10" required><c:out value='${param.lessonContent}'/></textarea> <%-- Giữ lại giá trị đã nhập nếu có lỗi --%>
+                        <textarea class="form-control form-control-lg" id="lessonContent" name="lessonContent" rows="10"><c:out value='${param.lessonContent}'/></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg">Thêm Bài Học</button>
                     <a href="${pageContext.request.contextPath}/admin/manage-lessons" class="btn btn-secondary btn-lg">Hủy</a>
@@ -85,6 +86,20 @@
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script>
       feather.replace();
+    </script>
+    <script>
+        tinymce.init({
+          selector: 'textarea#lessonContent', // Tìm đến textarea có ID là 'lessonContent'
+          plugins: [ // Danh sách các plugin (tính năng) bạn muốn dùng
+            'advlist', 'lists', 'link', 'image', 'charmap', 'preview',
+            'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+            'insertdatetime', 'media', 'table', 'help', 'wordcount'
+          ],
+          toolbar: 'undo redo | blocks | ' +
+            'bold italic forecolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent | ' +
+            'removeformat | help'
+        });
     </script>
 </body>
 </html>

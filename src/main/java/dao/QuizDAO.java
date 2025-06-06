@@ -8,10 +8,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.QuizHistoryItem;
+import model.UserQuizAttempt;
 
 public class QuizDAO {
     private static final Logger LOGGER = Logger.getLogger(QuizDAO.class.getName());
@@ -248,5 +251,81 @@ public class QuizDAO {
             }
         }
         return success;
+    }
+    /**
+     * Lấy lịch sử làm bài quiz của người dùng, được tổng hợp theo mỗi lần làm.
+     * @param userId ID của người dùng.
+     * @return Danh sách các đối tượng QuizHistoryItem.
+     */
+    public List<QuizHistoryItem> getQuizHistoryForUser(int userId) {
+        List<QuizHistoryItem> history = new ArrayList<>();
+        // Câu lệnh SQL này join 4 bảng và nhóm kết quả để tính điểm cho mỗi lần làm bài
+        String query = "SELECT " +
+                       "    l.lesson_id, " +
+                       "    l.title AS lesson_title, " +
+                       "    a.attempted_at, " +
+                       "    SUM(CASE WHEN a.is_answer_correct = 1 THEN 1 ELSE 0 END) AS score, " +
+                       "    COUNT(a.quiz_question_id) AS total_questions " +
+                       "FROM " +
+                       "    user_quiz_attempts a " +
+                       "JOIN " +
+                       "    quiz_questions q ON a.quiz_question_id = q.question_id " +
+                       "JOIN " +
+                       "    lessons l ON q.lesson_id = l.lesson_id " +
+                       "WHERE " +
+                       "    a.user_id = ? " +
+                       "GROUP BY " +
+                       "    l.lesson_id, l.title, a.attempted_at " + // Nhóm theo cả thời gian để phân biệt các lần làm khác nhau
+                       "ORDER BY " +
+                       "    a.attempted_at DESC;";
+
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+            
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    QuizHistoryItem item = new QuizHistoryItem();
+                    item.setLessonId(rs.getInt("lesson_id"));
+                    item.setLessonTitle(rs.getString("lesson_title"));
+                    item.setScore(rs.getInt("score"));
+                    item.setTotalQuestions(rs.getInt("total_questions"));
+                    item.setAttemptedAt(rs.getTimestamp("attempted_at"));
+                    history.add(item);
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy lịch sử làm bài cho user ID: " + userId, e);
+        }
+        return history;
+    }
+    /**
+     * Lưu lại một lần trả lời của người dùng vào CSDL.
+     * @param attempt Đối tượng UserQuizAttempt chứa thông tin cần lưu.
+     * @return true nếu lưu thành công, false nếu thất bại.
+     */
+    public boolean saveUserAttempt(UserQuizAttempt attempt) {
+        // Câu lệnh SQL để chèn một bản ghi mới vào bảng user_quiz_attempts
+        String query = "INSERT INTO user_quiz_attempts (user_id, quiz_question_id, selected_option_id, is_answer_correct, attempted_at) VALUES (?, ?, ?, ?, ?)";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            // Thiết lập các tham số cho câu lệnh INSERT
+            ps.setInt(1, attempt.getUserId());
+            ps.setInt(2, attempt.getQuizQuestionId());
+            ps.setInt(3, attempt.getSelectedOptionId());
+            ps.setBoolean(4, attempt.isIsAnswerCorrect());
+            ps.setTimestamp(5, new Timestamp(System.currentTimeMillis())); // Lấy thời gian hiện tại để lưu
+
+            // Thực thi và trả về true nếu có ít nhất 1 dòng được thêm vào
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lưu kết quả làm bài của user ID: " + attempt.getUserId(), e);
+        }
+        
+        // Trả về false nếu có lỗi xảy ra
+        return false;
     }
 }

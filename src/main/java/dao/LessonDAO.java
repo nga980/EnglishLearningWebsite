@@ -202,4 +202,34 @@ public class LessonDAO {
         }
         return lessons;
     }
+    /**
+     * Lấy một số lượng bài học được tạo gần đây nhất.
+     * @param numberOfLessons Số lượng bài học muốn lấy.
+     * @return Danh sách các bài học mới nhất.
+     */
+    public List<Lesson> getRecentLessons(int numberOfLessons) {
+        List<Lesson> lessons = new ArrayList<>();
+        // Sắp xếp theo ngày tạo giảm dần và giới hạn số lượng kết quả
+        String query = "SELECT lesson_id, title, content, created_at FROM lessons ORDER BY created_at DESC LIMIT ?";
+        
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(query)) {
+
+            ps.setInt(1, numberOfLessons);
+            
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Lesson lesson = new Lesson();
+                    lesson.setLessonId(rs.getInt("lesson_id"));
+                    lesson.setTitle(rs.getString("title"));
+                    lesson.setContent(rs.getString("content"));
+                    lesson.setCreatedAt(rs.getTimestamp("created_at"));
+                    lessons.add(lesson);
+                }
+            }
+        } catch (SQLException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "Lỗi khi lấy danh sách bài học gần đây", e);
+        }
+        return lessons;
+    }
 }

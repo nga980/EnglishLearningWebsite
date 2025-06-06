@@ -4,7 +4,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="${pageContext.request.contextPath}/index.jsp">English Learning</a>
+    <a class="navbar-brand" href="${pageContext.request.contextPath}/home">English Learning</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -12,7 +12,7 @@
         <%-- Các mục điều hướng chính --%>
         <ul class="navbar-nav mr-auto">
             <li class="nav-item ${param.activePage == 'home' ? 'active' : ''}">
-                <a class="nav-link" href="${pageContext.request.contextPath}/index.jsp">Trang Chủ</a>
+                <a class="nav-link" href="${pageContext.request.contextPath}/home">Trang Chủ</a>
             </li>
             <li class="nav-item ${param.activePage == 'lessons' ? 'active' : ''}">
                 <a class="nav-link" href="${pageContext.request.contextPath}/lessons">Bài Học</a>
@@ -44,6 +44,7 @@
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="${pageContext.request.contextPath}/profile">Hồ sơ của tôi</a>
+                            <a class="dropdown-item" href="${pageContext.request.contextPath}/quiz-history">Lịch sử học tập</a>
                             <% if ("ADMIN".equals(loggedInUser.getRole())) { %>
                                 <a class="dropdown-item" href="${pageContext.request.contextPath}/admin/dashboard">Trang quản trị</a>
                             <% } %>
